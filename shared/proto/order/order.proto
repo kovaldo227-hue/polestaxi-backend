@@ -2,22 +2,11 @@ syntax = "proto3";
 
 package polestaxi.order.v1;
 
-import "google/api/annotations.proto";
-
 option csharp_namespace = "PolesTaxi.Contracts.Order.V1";
 
 service OrderService {
-  rpc Create(CreateOrderRequest) returns (OrderResponse) {
-    option (google.api.http) = {
-      post: "/v1/orders"
-      body: "*"
-    };
-  }
-  rpc Get(GetOrderRequest) returns (OrderResponse) {
-    option (google.api.http) = {
-      get: "/v1/orders/{id}"
-    };
-  }
+  rpc Create(CreateOrderRequest) returns (OrderResponse);
+  rpc Get(GetOrderRequest) returns (OrderResponse);
 }
 
 message CreateOrderRequest {
