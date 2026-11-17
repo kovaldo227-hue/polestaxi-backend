@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package polestaxi.order.v1;
+
+option csharp_namespace = "PolesTaxi.Contracts.Order.V1";
+
+service OrderService {
+  rpc Create(CreateOrderRequest) returns (OrderResponse);
+  rpc Get(GetOrderRequest) returns (OrderResponse);
+}
+
+message CreateOrderRequest {
+  Location pickup = 1;
+  Location dropoff = 2;
+  string taxi_type = 3;
+}
+
+message GetOrderRequest {
+  string id = 1;
+}
+
+message Location {
+  double latitude = 1;
+  double longitude = 2;
+  string address = 3;
+}
+
+message OrderResponse {
+  string id = 1;
+  string user_id = 2;
+  string status = 3;
+  double price = 4;
+}

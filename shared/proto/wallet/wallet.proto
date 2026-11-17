@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package polestaxi.wallet.v1;
+
+option csharp_namespace = "PolesTaxi.Contracts.Wallet.V1";
+
+service WalletService {
+  rpc CreateWallet(CreateWalletRequest) returns (WalletResponse);
+}
+
+message CreateWalletRequest {
+  string user_id = 1;
+  string currency = 2;
+}
+
+message WalletResponse {
+  string id = 1;
+  string user_id = 2;
+  double balance = 3;
+  string currency = 4;
+}

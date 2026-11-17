@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package polestaxi.analytic.v1;
+
+option csharp_namespace = "PolesTaxi.Contracts.Analytic.V1";
+
+service AnalyticService {
+  rpc GetOrders(Empty) returns (OrderStatsResponse);
+}
+
+message OrderStatsResponse {
+  int64 total_orders = 1;
+  int64 completed = 2;
+  double average_price = 3;
+}
+
+message Empty {}

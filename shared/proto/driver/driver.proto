@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package polestaxi.driver.v1;
+
+option csharp_namespace = "PolesTaxi.Contracts.Driver.V1";
+
+service DriverService {
+  rpc GetMe(Empty) returns (DriverResponse);
+  rpc Register(RegisterDriverRequest) returns (DriverResponse);
+}
+
+message RegisterDriverRequest {
+  string user_id = 1;
+}
+
+message DriverResponse {
+  string id = 1;
+  string user_id = 2;
+  string taxi_type = 3;
+  string license_plate = 4;
+  string status = 5;
+}
+
+message Empty {}
