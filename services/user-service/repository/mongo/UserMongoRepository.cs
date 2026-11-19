@@ -1,38 +1,31 @@
-using MongoDB.Bson;
 using MongoDB.Driver;
-using PolesTaxi.Shared.Errors;
-using PolesTaxi.Shared.Types;
-using PolesTaxi.UserService.Entity.Repository;
-using PolesTaxi.UserService.Entity.Service;
-namespace PolesTaxi.UserService.Repository.Mongo;
-public sealed class UserMongoRepository
+using PolesTaxi.UserService.app.db.mongo; // Проверьте, что тут .db.mongo
+using PolesTaxi.UserService.entity;      // <--- Ссылка на User
+
+namespace PolesTaxi.UserService.repository.mongo;
+
+public interface IUserRepository
 {
-    private readonly IMongoCollection<UserDocument> _users;
-    public UserMongoRepository(IMongoCollection<UserDocument> users) { _users = users; }
-    public async Task<User> Create(User user, CancellationToken cancellationToken)
+    Task<User?> GetByEmailAsync(string email);
+    Task CreateAsync(User user);
+}
+
+public class UserMongoRepository : IUserRepository
+{
+    private readonly IMongoCollection<User> _users;
+
+    public UserMongoRepository(MongoDbContext context)
     {
-        var doc = ToDocument(user);
-        try { await _users.InsertOneAsync(doc, cancellationToken: cancellationToken); }
-        catch (MongoWriteException ex) when (ex.WriteError.Code == 11000) { throw AppException.Conflict("email or phone already exists"); }
-        return ToDomain(doc);
+        _users = context.GetCollection<User>("Users");
     }
-    public async Task SoftDelete(string id, CancellationToken cancellationToken)
+
+    public async Task<User?> GetByEmailAsync(string email)
     {
-        await _users.UpdateOneAsync(x => x.Id == id, Builders<UserDocument>.Update.Set(x => x.IsDeleted, true), cancellationToken: cancellationToken);
+        return await _users.Find(u => u.Email == email).FirstOrDefaultAsync();
     }
-    private static UserDocument ToDocument(User user) => new()
+
+    public async Task CreateAsync(User user)
     {
-        Id = string.IsNullOrEmpty(user.Id) ? ObjectId.GenerateNewId().ToString() : user.Id,
-        Name = user.Name, Phone = user.Phone, Email = user.Email.ToLowerInvariant(),
-        PasswordHash = user.PasswordHash, Roles = user.Roles.Select(r => r.ToWire()).ToList(),
-        Rating = user.Rating, RecentRatings = user.RecentRatings.ToList(),
-        IsDeleted = user.IsDeleted, CreatedAt = user.CreatedAt, UpdatedAt = user.UpdatedAt
-    };
-    private static User ToDomain(UserDocument doc) => new()
-    {
-        Id = doc.Id, Name = doc.Name, Phone = doc.Phone, Email = doc.Email,
-        PasswordHash = doc.PasswordHash, Roles = doc.Roles.Select(EnumMaps.RoleFromWire).ToList(),
-        Rating = doc.Rating, RecentRatings = doc.RecentRatings, IsDeleted = doc.IsDeleted,
-        CreatedAt = doc.CreatedAt, UpdatedAt = doc.UpdatedAt
-    };
+        await _users.InsertOneAsync(user);
+    }
 }

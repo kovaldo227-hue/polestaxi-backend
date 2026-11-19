@@ -1,16 +1,30 @@
-using PolesTaxi.Shared.Types;
-using PolesTaxi.UserService.Entity.Service;
-using PolesTaxi.UserService.Repository.Mongo;
-namespace PolesTaxi.UserService.Service;
-public sealed class UserAppService
+using PolesTaxi.UserService.entity;          // <--- Ссылка на User
+using PolesTaxi.UserService.repository.mongo; // <--- Ссылка на репозиторий
+
+namespace PolesTaxi.UserService.service;
+
+public interface IUserAppService
 {
-    private readonly UserMongoRepository _users;
-    public UserAppService(UserMongoRepository users) { _users = users; }
-    public async Task<User> Register(string name, string phone, string email, string password, Role role, CancellationToken ct)
+    Task<User?> GetUserByEmailAsync(string email);
+    Task CreateUserAsync(User user);
+}
+
+public class UserAppService : IUserAppService
+{
+    private readonly IUserRepository _repository;
+
+    public UserAppService(IUserRepository repository)
     {
-        var now = DateTime.UtcNow;
-        var user = new User { Id = string.Empty, Name = name, Phone = phone, Email = email, PasswordHash = password,
-            Roles = new List<Role> { role }, Rating = 0, RecentRatings = new List<double>(), IsDeleted = false, CreatedAt = now, UpdatedAt = now };
-        return await _users.Create(user, ct);
+        _repository = repository;
+    }
+
+    public async Task<User?> GetUserByEmailAsync(string email)
+    {
+        return await _repository.GetByEmailAsync(email);
+    }
+
+    public async Task CreateUserAsync(User user)
+    {
+        await _repository.CreateAsync(user);
     }
 }

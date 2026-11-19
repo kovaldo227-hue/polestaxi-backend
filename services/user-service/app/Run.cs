@@ -1,33 +1,37 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Driver;
-using PolesTaxi.Shared.Hosting;
-using PolesTaxi.UserService.App.Db.Mongo;
-using PolesTaxi.UserService.Config;
-using PolesTaxi.UserService.Entity.Repository;
-using PolesTaxi.UserService.Handler.Grpc;
-using PolesTaxi.UserService.Repository.Mongo;
-using PolesTaxi.UserService.Service;
-namespace PolesTaxi.UserService.App;
+using PolesTaxi.UserService.app.db.mongo;
+using PolesTaxi.UserService.repository.mongo;
+using PolesTaxi.UserService.service;
+
+namespace PolesTaxi.UserService.app;
+
 public static class Run
 {
-    public static async Task<int> ExecuteAsync(string[] args)
+    public static void ConfigureServices(WebApplicationBuilder builder)
     {
-        var builder = WebApplication.CreateBuilder(args);
-        var config = AppConfig.FromEnvironment();
-        builder.WebHost.ConfigureKestrel(options => Listen.DualPorts(options, 8081, 9081));
-        builder.Services.AddPolesTaxiGrpc();
-        var mongo = await PolesTaxi.UserService.App.Db.Mongo.MongoClient.New(config.MongoConnection, config.MongoDatabase, CancellationToken.None);
-        builder.Services.AddSingleton(mongo);
-        builder.Services.AddSingleton<IMongoCollection<UserDocument>>(sp => sp.GetRequiredService<PolesTaxi.UserService.App.Db.Mongo.MongoClient>().Users);
-        builder.Services.AddSingleton<UserMongoRepository>();
-        builder.Services.AddSingleton<UserAppService>();
-        builder.Services.AddSingleton<GrpcHandler>();
-        var app = builder.Build();
-        app.MapGrpcService<GrpcHandler>();
-        app.MapHealth();
-        Console.WriteLine("user-service ready");
-        await app.RunAsync();
-        return 0;
+        builder.Services.AddControllers();
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+
+        builder.Services.AddSingleton<MongoDbContext>();
+        builder.Services.AddScoped<IUserRepository, UserMongoRepository>();
+        builder.Services.AddScoped<IUserAppService, UserAppService>();
+        
+        // gRPC временно отключаем, чтобы не было ошибок (пока нет .proto)
+        // builder.Services.AddGrpc(); 
+    }
+
+    public static void Configure(WebApplication app)
+    {
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI();
+        }
+
+        app.UseRouting();
+        app.MapControllers();
+        // app.MapGrpcService<GrpcHandler>(); 
     }
 }

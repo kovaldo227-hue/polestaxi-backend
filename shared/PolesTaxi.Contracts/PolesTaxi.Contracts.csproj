@@ -20,6 +20,8 @@
     <Protobuf Include="..\proto\wallet\wallet.proto" GrpcServices="Both" ProtoRoot="..\proto" />
     <Protobuf Include="..\proto\analytic\analytic.proto" GrpcServices="Both" ProtoRoot="..\proto" />
     <Protobuf Include="..\proto\events\events.proto" GrpcServices="None" ProtoRoot="..\proto" />
-  </ItemGroup>
+    <Protobuf Include="..\proto\google\api\*.proto" GrpcServices="None" ProtoRoot="..\proto" />
+ 
+ </ItemGroup>
 
 </Project>
