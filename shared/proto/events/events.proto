@@ -1,0 +1,5 @@
+syntax = "proto3";
+package polestaxi.events.v1;
+option csharp_namespace = "PolesTaxi.Contracts.Events.V1";
+message UserRegisteredEvent { string user_id = 1; string role = 2; int64 occurred_at = 3; }
+message OrderStatusChangedEvent { string order_id = 1; string status = 2; string user_id = 3; string driver_id = 4; double price = 5; int64 distance_meters = 6; int64 occurred_at = 7; }
